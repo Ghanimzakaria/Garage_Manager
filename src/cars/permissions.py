@@ -5,7 +5,7 @@ class IsAdmin(permissions.BasePermission):
 
 
     def has_permission(self, request, view):
-        return request.user and request.user.is_staff
+        return request.user and request.user.role == 'admin'
 
 
 class IsEmployee(permissions.BasePermission):
