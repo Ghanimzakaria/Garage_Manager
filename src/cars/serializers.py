@@ -1,11 +1,11 @@
 from rest_framework import serializers
-from .models import Car, User, Client, Employee
+from .models import Car, User
 
 
 class CarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Car
-        fields = ['registration_number', 'brand', 'model', 'status']
+        fields = ['registration_number', 'brand', 'model', 'status','assigned_employee','client']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -22,12 +22,3 @@ class UserSerializer(serializers.ModelSerializer):
         )
         return user
 
-class ClientSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Client
-        fields = ['name', 'surname']
-
-class EmployeeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Employee
-        fields = ['name', 'surname']
