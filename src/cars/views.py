@@ -60,8 +60,7 @@ class CarCreateAPIView(APIView):
 
 
 class CarUpdateAPIView(APIView):
-    permission_classes = [IsEmployee]
-    permission_classes = [IsAdmin]
+    permission_classes = [IsEmployee | IsAdmin]
 
     def put(self, request, immatriculation):
         car = get_object_or_404(Car, registration_number=immatriculation)
