@@ -33,8 +33,6 @@ class CarCreateAPIView(APIView):
 
     def post(self,request):
         data = request.data
-        print("Assigned Employee:", data.get("assigned_employee"))
-        print("Client:", data.get("client"))
         try:
             employee_username = data.get("assigned_employee")
             employee = get_object_or_404(User,username = employee_username)
@@ -48,8 +46,8 @@ class CarCreateAPIView(APIView):
             'brand':data.get("brand"),
             'model':data.get("model"),
             'status':data.get("status"),
-            'assigned_employee':employee.id,  # Set the foreign key directly with the Employee instance
-            'client':client.id }
+            'assigned_employee':employee.id,
+            'client':client.id}
 
         car_serializer = CarSerializer(data=car_data)
         if car_serializer.is_valid():

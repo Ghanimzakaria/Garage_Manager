@@ -132,6 +132,16 @@ USE_I18N = True
 
 USE_TZ = True
 
+# settings.py
+ACCOUNT_ACTIVATION_DAYS = 7
+EMAIL_HOST = 'smtp.mail.yahoo.com'
+EMAIL_USE_TLS = 1
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'XXX'
+EMAIL_HOST_PASSWORD = 'XXX'
+
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
