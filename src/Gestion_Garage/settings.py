@@ -38,14 +38,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'cars'
+    'cars',
+    'corsheaders'
+
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
-    ],
+    ]
 }
 AUTH_USER_MODEL = 'cars.User'
 
@@ -63,8 +65,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:4200',  # Angular local server
+]
+CORS_ALLOW_ALL_ORIGINS = True
 ROOT_URLCONF = 'Gestion_Garage.urls'
 
 TEMPLATES = [
@@ -134,11 +141,11 @@ USE_TZ = True
 
 # settings.py
 ACCOUNT_ACTIVATION_DAYS = 7
-EMAIL_HOST = 'smtp.mail.yahoo.com'
+EMAIL_HOST = 'vde-formation.com'
 EMAIL_USE_TLS = 1
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'XXX'
-EMAIL_HOST_PASSWORD = 'XXX'
+EMAIL_HOST_USER = 'cwumqfpe@vde-formation.com'
+EMAIL_HOST_PASSWORD = 'rachidaGH96!'
 
 
 

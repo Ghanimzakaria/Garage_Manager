@@ -5,6 +5,7 @@ class IsAdmin(permissions.BasePermission):
 
 
     def has_permission(self, request, view):
+        print('laaaaaaaaaaaaaaaa', request.session.get('user_id'))
         return request.user and request.user.role == 'admin'
 
 
