@@ -16,11 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 urlpatterns = [
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # Pour obtenir le token
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # Pour rafraîchir le token
+    path('Garage/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # Pour obtenir le token
+    path('Garage/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # Pour rafraîchir le token
+    path('Garage-auth/', include('rest_framework.urls')),
     path('admin/', admin.site.urls),
     path('Garage/', include('cars.urls')),  # Inclut les URLs de l'application cars
 ]

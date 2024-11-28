@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework_jwt.settings import api_settings
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Car,User
 from .permissions import IsAdmin, IsEmployee, IsClient
@@ -27,8 +28,13 @@ class CarLISTAPIView(APIView):
 
     def get(self, request):
         cars = Car.objects.all()
-        serializer = CarSerializer(cars, many=True)
-        return Response(serializer.data)
+        serializers = CarSerializer(cars, many=True)
+        for ser, car in enumerate(cars):
+            employee = get_object_or_404(User, id=serializers.data[ser].get('assigned_employee'))
+            client = get_object_or_404(User, id=serializers.data[ser].get('client'))
+            serializers.data[ser]['assigned_employee'] = employee.username
+            serializers.data[ser]['client'] = client.username
+        return Response(serializers.data)
 
 class CarCreateAPIView(APIView):
     permission_classes = [IsAdmin]
@@ -37,9 +43,9 @@ class CarCreateAPIView(APIView):
         data = request.data
         try:
             employee_username = data.get("assigned_employee")
-            employee = get_object_or_404(User,username = employee_username)
+            employee = get_object_or_404(User,username=employee_username)
             client_username = data.get("client")
-            client = get_object_or_404(User,username = client_username)
+            client = get_object_or_404(User,username=client_username)
         except Exception as e :
             print("Error during get_object_or_404:", str(e))
             return Response({"error": "Error retrieving user information"}, status=400)
@@ -64,7 +70,22 @@ class CarUpdateAPIView(APIView):
 
     def put(self, request, immatriculation):
         car = get_object_or_404(Car, registration_number=immatriculation)
-        serializer = CarSerializer(car, data=request.data, partial=True)
+        data = request.data
+        try:
+            employee_username = data.get("assigned_employee")
+            employee = get_object_or_404(User,username=employee_username)
+            client_username = data.get("client")
+            client = get_object_or_404(User,username=client_username)
+        except Exception as e :
+            print("Error during get_object_or_404:", str(e))
+            return Response({"error": "Error retrieving user information"}, status=400)
+        car_data = {'registration_number': data.get("registration_number"),
+                    'brand': data.get("brand"),
+                    'model': data.get("model"),
+                    'status': data.get("status"),
+                    'assigned_employee': employee.id,
+                    'client': client.id}
+        serializer = CarSerializer(car, data=car_data, partial=True)
         if serializer.is_valid():
             if request.user.role == 'employee':
                 car.status = serializer.validated_data.get('status', car.status)
@@ -134,14 +155,13 @@ class UserLoginAPIView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        user = authenticate(username=username, password=password)
+        user = authenticate( username=username, password=password)
         if user:
-            # JWT setup
-            jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-            jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-            payload = jwt_payload_handler(user)
-            token = jwt_encode_handler(payload)
+            refresh = RefreshToken.for_user(user)
             print(user.role)
-            return Response({'token': token, 'role': user.role})
+            return Response({
+                'access_token': str(refresh.access_token),
+                'refresh_token': str(refresh),
+                'role': user.role  # Assuming the user model has a 'role' field
+            })
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
-

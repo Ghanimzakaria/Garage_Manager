@@ -5,7 +5,7 @@ from .views import CarCreateAPIView, CarDetailAPIView, CarUpdateAPIView, CarDele
 urlpatterns = [
     path('car/<str:immatriculation>/', CarDetailAPIView.as_view(), name='car-view'),
     path('cars/', CarLISTAPIView.as_view(), name='car-list-view'),
-    path('car/add', CarCreateAPIView.as_view(), name='add-car'),
+    path('cars/add/', CarCreateAPIView.as_view(), name='add-car'),
     path('cars/<str:immatriculation>/update/', CarUpdateAPIView.as_view(), name='car-update'),
     path('cars/<str:immatriculation>/delete/', CarDeleteAPIView.as_view(), name='car-delete'),
     path('login/', UserLoginAPIView.as_view(), name='login'),
