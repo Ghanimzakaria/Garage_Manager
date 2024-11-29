@@ -11,13 +11,13 @@ class IsAdmin(permissions.BasePermission):
 class IsEmployee(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        return request.user and request.user.role == 'employee'
+        return request.user.is_authenticated and request.user.role == 'employee'
 
 
 class IsClient(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        return request.user and request.user.role == 'client'
+        return request.user.is_authenticated and request.user.role == 'client'
 
     def has_object_permission(self, request, view, obj):
         # Clients can only view their own car

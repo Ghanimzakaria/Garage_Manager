@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -24,17 +24,24 @@ class CarDetailAPIView(APIView):
 
 
 class CarLISTAPIView(APIView):
-    permission_classes = [IsAdmin]
+    permission_classes = [IsEmployee | IsAdmin]
 
     def get(self, request):
-        cars = Car.objects.all()
-        serializers = CarSerializer(cars, many=True)
-        for ser, car in enumerate(cars):
-            employee = get_object_or_404(User, id=serializers.data[ser].get('assigned_employee'))
-            client = get_object_or_404(User, id=serializers.data[ser].get('client'))
-            serializers.data[ser]['assigned_employee'] = employee.username
-            serializers.data[ser]['client'] = client.username
-        return Response(serializers.data)
+
+        if request.user.role == 'admin':
+            cars = Car.objects.all()
+            serializers = CarSerializer(cars, many=True)
+            for ser, car in enumerate(cars):
+                employee = get_object_or_404(User, id=serializers.data[ser].get('assigned_employee'))
+                client = get_object_or_404(User, id=serializers.data[ser].get('client'))
+                serializers.data[ser]['assigned_employee'] = employee.username
+                serializers.data[ser]['client'] = client.username
+            return Response(serializers.data)
+
+        elif request.user.role == 'employee':
+            cars = get_list_or_404(Car, assigned_employee=request.user.id)
+            serializers = CarSerializer(cars, many=True)
+            return Response(serializers.data)
 
 class CarCreateAPIView(APIView):
     permission_classes = [IsAdmin]
@@ -71,33 +78,38 @@ class CarUpdateAPIView(APIView):
     def put(self, request, immatriculation):
         car = get_object_or_404(Car, registration_number=immatriculation)
         data = request.data
-        try:
-            employee_username = data.get("assigned_employee")
-            employee = get_object_or_404(User,username=employee_username)
-            client_username = data.get("client")
-            client = get_object_or_404(User,username=client_username)
-        except Exception as e :
-            print("Error during get_object_or_404:", str(e))
-            return Response({"error": "Error retrieving user information"}, status=400)
-        car_data = {'registration_number': data.get("registration_number"),
-                    'brand': data.get("brand"),
-                    'model': data.get("model"),
-                    'status': data.get("status"),
-                    'assigned_employee': employee.id,
-                    'client': client.id}
-        serializer = CarSerializer(car, data=car_data, partial=True)
-        if serializer.is_valid():
-            if request.user.role == 'employee':
-                car.status = serializer.validated_data.get('status', car.status)
-                car.save()
-                return Response(serializer.data)
-            elif request.user.role == 'admin':
-                car = serializer
-                car.save()
-                return Response(serializer.data)
+        serializerx = CarSerializer(car, partial=True)
 
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.user.role == 'employee':
+
+            car.status = data.get('status', car.status)
+            serializer_emp = CarSerializer(car,partial=True)
+            car.save()
+            return Response(serializer_emp.data)
+        elif request.user.role == 'admin':
+            try:
+                employee_username = data.get("assigned_employee")
+                employee = get_object_or_404(User, username=employee_username)
+                client_username = data.get("client")
+                client = get_object_or_404(User, username=client_username)
+            except Exception as e:
+                print("Error during get_object_or_404:", str(e))
+                return Response({"error": "Error retrieving user information"}, status=400)
+            car_data = {'registration_number': data.get("registration_number"),
+                        'brand': data.get("brand"),
+                        'model': data.get("model"),
+                        'status': data.get("status"),
+                        'assigned_employee': employee.id,
+                        'client': client.id}
+            serializer = CarSerializer(car, data=car_data, partial=True)
+            car = serializer
+            car.save()
+            return Response(serializer.data)
+
+
+        else :
+                return Response(serializerx.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CarDeleteAPIView(APIView):
     permission_classes = [IsAdmin]  # Only admin can view details
@@ -119,13 +131,9 @@ class UserDeleteAPIView(APIView):
 class CarClientDetailAPIView(APIView):
     permission_classes = [IsClient]
     def get(self, request):
-        car = get_object_or_404(Car, client_id=request.user.id)
-        serializer = CarSerializer(car)
-        car_data = {'registration_number': serializer.data.get("registration_number"),
-                    'brand': serializer.data.get("brand"),
-                    'model': serializer.data.get("model"),
-                    'status': serializer.data.get("status"),}
-        return Response(car_data)
+        car = get_list_or_404(Car, client_id=request.user.id)
+        serializer = CarSerializer(car, many=True)
+        return Response(serializer.data)
 
 
 class RegisterUSERView(APIView):
@@ -149,6 +157,8 @@ class RegisterUSERView(APIView):
                 serializer.save()
                 return Response({"message": "a user was added successfully."}, status=201)
             return Response(serializer.errors, status=400)
+    #  def get(self, request):
+
 
 # User Login View
 class UserLoginAPIView(APIView):
