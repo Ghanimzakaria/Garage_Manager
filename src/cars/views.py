@@ -9,7 +9,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Car,User
 from .permissions import IsAdmin, IsEmployee, IsClient
-from .serializers import CarSerializer, UserSerializer
+from .serializers import CarSerializer, UserSerializer, UsershowSerializer
+
 
 # Récupérer les détails d'une voiture par son immatriculation
 class CarDetailAPIView(APIView):
@@ -27,7 +28,6 @@ class CarLISTAPIView(APIView):
     permission_classes = [IsEmployee | IsAdmin]
 
     def get(self, request):
-
         if request.user.role == 'admin':
             cars = Car.objects.all()
             serializers = CarSerializer(cars, many=True)
@@ -103,8 +103,9 @@ class CarUpdateAPIView(APIView):
                         'assigned_employee': employee.id,
                         'client': client.id}
             serializer = CarSerializer(car, data=car_data, partial=True)
-            car = serializer
-            car.save()
+            if serializer.is_valid() :
+                car = serializer
+                car.save()
             return Response(serializer.data)
 
 
@@ -121,9 +122,7 @@ class CarDeleteAPIView(APIView):
 class UserDeleteAPIView(APIView):
     permission_classes = [IsAdmin]  # Only admin can view details
     def delete(self, request, username):
-        print(username)
         user = get_object_or_404(User, username=username)
-        print("&",user.username)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -137,6 +136,7 @@ class CarClientDetailAPIView(APIView):
 
 
 class RegisterUSERView(APIView):
+    permission_classes = [IsAdmin]
     def post(self, request):
         # Only allow employees to add clients
         if request.user.role == 'employee':
@@ -157,10 +157,16 @@ class RegisterUSERView(APIView):
                 serializer.save()
                 return Response({"message": "a user was added successfully."}, status=201)
             return Response(serializer.errors, status=400)
-    #  def get(self, request):
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UsershowSerializer(users, many=True)
+        return Response(serializer.data)
 
 
-# User Login View
+
+
+
+
 class UserLoginAPIView(APIView):
     def post(self, request):
         username = request.data.get('username')
@@ -168,7 +174,6 @@ class UserLoginAPIView(APIView):
         user = authenticate( username=username, password=password)
         if user:
             refresh = RefreshToken.for_user(user)
-            print(user.role)
             return Response({
                 'access_token': str(refresh.access_token),
                 'refresh_token': str(refresh),

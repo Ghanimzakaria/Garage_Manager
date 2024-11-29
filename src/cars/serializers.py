@@ -22,3 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
         return user
 
+class UsershowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'role']
