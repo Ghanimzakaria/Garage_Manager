@@ -159,8 +159,8 @@ ACCOUNT_ACTIVATION_DAYS = 7
 EMAIL_HOST = 'vde-formation.com'
 EMAIL_USE_TLS = 1
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'cwumqfpe@vde-formation.com'
-EMAIL_HOST_PASSWORD = 'rachidaGH96!'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
 
 
 
