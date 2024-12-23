@@ -111,17 +111,13 @@ WSGI_APPLICATION = 'Gestion_Garage.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'Garage_db',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': 'ZAKARIA_LAPTOP',
-        'PORT': '',
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'trusted_connection': 'yes',
-        },
-    }
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'garage',
+        'USER': 'root',
+        'PASSWORD': 'ziko',
+        'HOST': 'db',
+        'PORT':'3306',
+}
 }
 
 # Password validation

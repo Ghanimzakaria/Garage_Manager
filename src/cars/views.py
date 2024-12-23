@@ -1,10 +1,8 @@
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404, get_list_or_404
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework_jwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Car,User
